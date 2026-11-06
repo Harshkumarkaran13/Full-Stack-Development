@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ info.0 }} — PDF Master{% endblock %}
+{% block content %}
+<div class="crumb"><a href="/">Home</a> / {{ info.0 }}</div>
+<section class="intro">
+  <div class="eyebrow">DOCUMENT WORKSPACE</div>
+  <h1>{{ info.0 }}</h1>
+  <p>{{ info.1 }}</p>
+</section>
+{% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+<form class="panel" method="post" action="/process/{{ tool }}/" enctype="multipart/form-data" data-tool="{{ tool }}">
+  {% csrf_token %}
+  {% if info.2 != "message" %}
+  <label class="drop" id="drop">
+    <input id="files" type="file" name="files"
+      {% if info.2 == "multiple" or info.2 == "folder" %}multiple{% endif %}
+      {% if info.2 == "folder" %}webkitdirectory directory{% endif %}
+      {% if info.2 == "multiple" and tool == "jpg-to-pdf" %}accept="image/jpeg,image/png,image/webp"
+      {% elif tool == "word-to-pdf" %}accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      {% elif tool == "text-to-word" or tool == "txt-to-pdf" or tool == "text-locker" or tool == "encrypt-text" %}accept=".txt,text/plain"
+      {% elif tool == "word-to-text" %}accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      {% elif tool == "text-unlocker" or tool == "decrypt-text" %}accept=".pmx,application/octet-stream"
+      {% elif tool == "folder-unlocker" %}accept=".pmf,application/octet-stream"
+      {% elif tool == "lock-file" %}accept="*/*"
+      {% elif tool == "unlock-file" %}accept=".pme,application/octet-stream"
+      {% elif tool == "html-to-pdf" %}accept=".html,.htm,text/html"
+      {% else %}accept=".pdf,application/pdf"{% endif %}
+      {% if info.2 != "folder" %}required{% endif %}>
+    <span class="upload">{% if info.2 == "folder" %}▱{% else %}↑{% endif %}</span>
+    <b>{% if info.2 == "folder" %}Select a folder or <u>browse</u>{% else %}Drop files here or <u>browse</u>{% endif %}</b>
+    <small>
+      {% if info.2 == "multiple" %}Select multiple files
+      {% elif info.2 == "folder" %}Choose a folder; its subfolders and file paths will be included
+      {% elif tool == "pdf-scanner" %}Choose a PDF to inspect
+      {% elif tool == "pdf-to-word" %}Choose a PDF file
+      {% elif tool == "word-to-pdf" %}Choose a Word document (.docx or .doc)
+      {% elif tool == "text-to-word" or tool == "txt-to-pdf" or tool == "text-locker" or tool == "encrypt-text" %}Choose a UTF-8 TXT file
+      {% elif tool == "word-to-text" %}Choose a .docx Word document
+      {% elif tool == "text-unlocker" or tool == "decrypt-text" %}Choose a .pmx encrypted text file
+      {% elif tool == "folder-unlocker" %}Choose a .pmf protected folder file
+      {% elif tool == "lock-file" %}Choose any file type
+      {% elif tool == "unlock-file" %}Choose a .pme protected file
+      {% elif tool == "html-to-pdf" %}Choose an HTML file
+      {% else %}Choose one PDF{% endif %}
+      · 25 MB limit
+    </small>
+  </label>
+  <input type="hidden" id="folder_manifest" name="folder_manifest" value="[]">
+  <div id="filelist" class="filelist" aria-live="polite"></div>
+  {% endif %}
+
+  <div class="fields">
+    {% if tool == "split" %}<label>Pages to extract<input name="pages" placeholder="1-3,5" required></label>{% endif %}
+    {% if tool == "remove-pages" %}<label>Page numbers to remove<input name="pages" placeholder="Example: 2,4-6" required></label>{% endif %}
+    {% if tool == "rotate" %}<label>Rotation<select name="degrees"><option value="90">90° clockwise</option><option value="180">180°</option><option value="270">270° clockwise</option></select></label>{% endif %}
+    {% if tool == "watermark" %}<label>Watermark text<input name="watermark" placeholder="CONFIDENTIAL" maxlength="100" required></label>{% endif %}
+    {% if tool == "page-numbers" %}<label>Number position<select name="position"><option value="bottom">Bottom</option><option value="top">Top</option></select></label>{% endif %}
+
+    {% if tool == "pdf-locker" or tool == "protect" or tool == "pdf-unlocker" or tool == "unlock" or tool == "text-locker" or tool == "text-unlocker" or tool == "encrypt-text" or tool == "decrypt-text" or tool == "lock-file" or tool == "unlock-file" or tool == "folder-locker" or tool == "folder-unlocker" %}
+      <label>{% if tool == "pdf-unlocker" or tool == "unlock" or tool == "text-unlocker" or tool == "decrypt-text" or tool == "unlock-file" or tool == "folder-unlocker" %}Decryption password{% else %}Create password{% endif %}
+        <input type="password" name="password" minlength="8" required autocomplete="new-password" placeholder="At least 8 characters">
+      </label>
+    {% endif %}
+    {% if tool == "pdf-scanner" %}<label>PDF password (optional)<input type="password" name="password" autocomplete="current-password" placeholder="Only if this PDF is password-protected"></label>{% endif %}
+    {% if tool == "encrypt-message" %}
+      <label>Message to encrypt<textarea name="message" rows="6" required placeholder="Type your private message here..."></textarea></label>
+      <label>Encryption password<input type="password" name="password" minlength="8" required autocomplete="new-password" placeholder="At least 8 characters"></label>
+    {% endif %}
+  </div>
+  <button class="primary submit" type="submit">{% if tool == "pdf-scanner" %}Scan PDF{% elif tool == "pdf-locker" or tool == "text-locker" or tool == "folder-locker" %}Lock securely{% elif tool == "pdf-unlocker" or tool == "text-unlocker" or tool == "folder-unlocker" %}Unlock file{% else %}Process file{% endif %} <span>→</span></button>
+  <p class="fine">Files are stored in this server's private session history. Use documents you are authorized to process. Passwords are not saved and cannot be recovered.</p>
+</form>
+{% if tool == "pdf-scanner" %}<p class="notice">The scanner checks PDF structure and selected active-content indicators. It is not antivirus software and cannot certify a file as safe.</p>{% endif %}
+{% if tool == "folder-locker" %}<p class="notice">Folder contents are packaged and encrypted into a .pmf file. Unlocking restores a ZIP archive; extract it on your computer to access the folder.</p>{% endif %}
+<a class="back" href="/">← Back to all tools</a>
+{% endblock %}

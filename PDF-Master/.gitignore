@@ -1,0 +1,20 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+.env
+media/*
+!media/.gitkeep
+staticfiles/
+frontend/node_modules/
+frontend/dist/
+.pytest_cache/
+.coverage
+
+# PDF Master protected vault containers and local unlocked working copies
+*.pmlock
+*.pmx
+*.pme
+*.pmf
+.PDFMasterVault/

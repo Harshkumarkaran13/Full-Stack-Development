@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}PDF Master — Document tools{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="eyebrow">YOUR DOCUMENT WORKSPACE</div>
+  <h1>Documents.<br><em>Under control.</em></h1>
+  <p>Convert, organize, inspect and protect your PDFs and everyday documents from one focused workspace.</p>
+  <a class="primary" href="#tools">Explore tools <b>↓</b></a>
+  <div class="orb"></div>
+</section>
+<section class="quick-pairs">
+  <a href="/tool/pdf-to-word/"><b>PDF → Word</b><span>Make a PDF editable.</span></a>
+  <a href="/tool/word-to-pdf/"><b>Word → PDF</b><span>Create a shareable PDF.</span></a>
+  <a href="/tool/pdf-locker/"><b>PDF Locker</b><span>Password-protect a PDF.</span></a>
+  <a href="/tool/folder-locker/"><b>Folder Locker</b><span>Encrypt a folder and its files.</span></a>
+</section>
+<section class="file-security">
+  <div>
+    <div class="eyebrow">PRIVACY & DOCUMENT CHECKS</div>
+    <h2>Lock it. Convert it. Check it.</h2>
+    <p>Use password-based lockers for PDFs, text files, folders and other files. Run the PDF scanner for a structural report before reviewing a document.</p>
+  </div>
+  <a class="primary" href="/tool/pdf-scanner/">Scan a PDF →</a>
+</section>
+<section id="tools" class="section">
+  <div class="sectionhead"><div><div class="eyebrow">THE TOOLBOX</div><h2>Choose a tool</h2></div><small>{{ tools|length }} available tools</small></div>
+  <div class="grid">
+    {% for slug,info in tools.items %}
+      <a class="card" href="/tool/{{ slug }}/"><span class="number">{{ forloop.counter|stringformat:"02d" }}</span><b>{{ info.0 }}</b><p>{{ info.1 }}</p><i>↗</i></a>
+    {% endfor %}
+  </div>
+</section>
+<section class="recent">
+  <div><div class="eyebrow">THIS BROWSER SESSION</div><h2>Recent processing</h2></div>
+  <a href="/history/">View history →</a>
+  {% for item in recent %}
+    <div class="recentrow"><span>FILE</span>{{ item.original_name|default:"Document" }}<small>{{ item.tool }} · {{ item.created_at|date:"d M, H:i" }}</small></div>
+  {% empty %}<p class="muted">Your processed files will appear here during this browser session.</p>{% endfor %}
+</section>
+{% endblock %}
